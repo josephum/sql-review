@@ -1,0 +1,194 @@
+SELECT *
+FROM employees;
+
+select * from departments;
+
+select * from regions;
+
+select employee_id,first_name,department from employees;
+
+select * from employees where department = 'Sports';
+
+select * from employees where department like '%nit%';
+
+select * from employees where department like 'G____';
+
+select * from employees where salary < 100000;
+select * from employees where salary >= 100000;
+select * from employees where salary > 100000;
+
+-- show me the employee's first_name, last_name, department, salary
+-- who is working in Clothing dep and making more that 90000
+
+select first_name, last_name, department, salary
+from employees
+where department = 'Clothing' and salary > 90000;
+
+-- show all employee who is making less than 40000
+-- and working in either Clothing or Pharmacy department
+
+select * from employees
+where salary < 40000 and (department='Clothing' or department='Pharmacy');
+
+-- show me everything not belongs to Sport department
+select * from employees where department<> 'Sports';
+
+select first_name,email from employees where email is not null;
+
+select * from employees where salary between 80000 and 100000;
+
+-- Write a query that returns the first_name and email of females
+-- that work in the Tools department having a salary greater than 110,000
+select first_name,email from employees where gender='F' and department='Tools'
+and salary > 110000;
+
+select * from employees order by employee_id asc;
+select * from employees order by employee_id;
+-- ASC 0-9 a-z. Is DEFAULT!!!
+-- DESC 9-0 z-a
+select * from employees order by employee_id desc;
+
+-- sort employees based on first_name
+select * from employees order by first_name;
+
+-- How to limit results on the screen, LIMIT or FETCH
+select * from employees order by first_name limit 5;
+
+-- In Postgres
+select * from employees order by first_name fetch first 5 rows only;
+
+-- how to see only unique departments
+select distinct department from employees;
+
+-- change name of the attribute or columns name
+select salary as annual_salary from employees;
+
+-- write a query that displays the naem and ages of the top 4 oldest students
+select student_name,age from students order by age desc limit 4;
+
+-- string manipulation
+select upper(first_name),lower(last_name) from employees;
+
+select  length(first_name), first_name from employees;
+
+select trim('     Hello There  ');
+select length('     Hello There  ');
+select length(trim('     Hello There  '));
+
+-- create full name column and display
+select first_name||' '||last_name as full_name from employees;
+
+-- boolean values
+select first_name,salary,(salary>140000) as GreaterThan140 from employees order by salary desc ;
+
+-- substring(string,start_position,length)
+select substring('this is test data',5,4) as test_data;
+select substring('this is test data' from 1 for 4) as test_data;
+
+-- display one initials column which first_name.last_name (first letter)
+select first_name,last_name,substring(first_name,1,1)||'.'||substring(last_name,1,1)||'.' as initials
+from employees;
+
+select department,replace(department,'Clothing','Clothes') from departments;
+
+-- String man. functions is not changing the original table data, only displaying result
+
+-- aggregate functions
+select max(salary) from employees;
+select min(salary) from employees;
+
+select round(avg(salary),2) from employees;
+
+select count(email) from employees;
+
+select sum(salary) from employees;
+
+select sum(salary) from employees where department='Clothing';
+
+-- Who is making the lowest salary?
+select min(salary) from employees;
+select * from employees where salary = 20542;
+
+-- or with sub-query
+select * from employees where salary = (select min(salary) from employees);
+select * from employees where salary = (select max(salary) from employees);
+
+-- show me all the unique email domains
+select email from employees;
+select distinct substring(email,strpos(email,'@')+1,length(email)) as domain from employees;
+
+select distinct department from departments;
+-- how many employee working in Pharmacy department
+select count(*) from employees where department = 'Pharmacy';
+select count(*) from employees where department = 'Clothing';
+-- and so on
+
+-- how many employee working for each department?
+select count(*),department,max(salary),min(salary),sum(salary),round(avg(salary)) as avg from employees group by department;
+
+-- list the department whre they have more than 40 employee
+select count(*),department from employees where department <> 'Garden'
+group by department
+having count(*) > 40 order by department;
+
+-- show me the duplicate email domains and how many time they repeat
+select count(*),substring(email,strpos(email,'@')+1,length(email)) as email_domain
+from employees
+where email is not null
+group by email_domain
+having count(*) > 1;
+-- Good interview question!!!
+-- How to find duplicate names? Use count, group by and having count > 1
+
+select first_name,salary,
+        case
+            when salary > 80000 then 'UNDER PAID'
+            when salary > 80000 then 'PAID WELL'
+            else 'UNPAID'
+        end as category
+from employees;
+
+-- joins
+-- sub-queries
+-- indexes
+-- store procedures
+-- functions
+-- triggers
+
+---------------------------------------------------------------------------------------------------
+-- Session 2: Thu Apr 7, 2022
+
+-- list employees first_name, last_name and their countries
+
+select first_name,last_name, country from employees e join regions r on e.region_id = r.region_id;
+
+-- list firstname,email, division for employees who has email address
+select first_name,email,division from employees e join departments d on e.department = d.department
+where email is not null;
+
+-- list firstname,email, division, country for all employee
+select first_name,email,division,country from employees e join departments d on e.department = d.department
+inner join regions r on e.region_id = r.region_id where email is not null;
+
+
+select distinct e.department,d.department from employees e left join departments d on e.department = d.department
+where d.department is null;
+
+select distinct e.department,d.department from employees e right join departments d on e.department = d.department;
+
+select distinct e.department,d.department from employees e full join departments d on e.department = d.department;
+
+-- Return all employees that work in electronic division
+select * from employees e join departments d on e.department = d.department where division='Electronics';
+
+-- can we get the same result with other way?
+select * from employees where (select division='Electronics' from departments where employees.department=departments.department);
+
+select * from employees where  department in(select department from departments where division ='Electronics');
+
+-- Set operators
+select department from employees union select department from departments;
+select department from employees union all select department from departments;
+
+select department from employees except select department from departments;
+select department from employees intersect select department from departments;

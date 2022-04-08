@@ -1,0 +1,26 @@
+CREATE TABLE Towns (
+                       id SERIAL UNIQUE NOT NULL,
+                       code VARCHAR(10) NOT NULL, -- not unique
+                       article TEXT,
+                       name TEXT NOT NULL -- not unique
+);
+insert into towns (
+    code, article, name
+)
+select
+    left(md5(i::text), 10),
+    md5(random()::text),
+    md5(random()::text)
+from generate_series(1, 1000000) s(i);
+
+select count(*) from towns;
+
+select * from towns;
+
+explain analyze select * from towns where name='f9c9456415db9869dc33b79fb19c42a8';
+explain analyze select * from towns where id=2;
+
+create index idx_towns_name on towns(name);
+drop index if exists idx_towns_name;
+
+select tablename,indexname,indexdef from pg_indexes where schemaname = 'public' order by tablename,indexname;
